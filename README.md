@@ -1,0 +1,3 @@
+# JSON-C
+## Goal: Simple Json parser for C
+MORE INFORMATION LATER...
