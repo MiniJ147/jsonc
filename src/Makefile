@@ -1,2 +1,5 @@
+files = parsers/parser.c parsers/lexer.c main.c
+output = ../bin/a.out
+
 run:
-	gcc main.c && ./a.out && rm -f a.out
+	gcc $(files) -o $(output) && ./$(output) && rm -f $(output)

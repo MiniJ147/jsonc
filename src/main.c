@@ -3,6 +3,8 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "linker.h"
+
 #define KILOBYTE 1000 //1000 bytes
 #define MAX_FILE_SIZE KILOBYTE * 56// 56kb max size
 
@@ -10,7 +12,7 @@
 // returns string with number of bytes read
 // can return up to MAX_FILE_SIZE
 // calls malloc
-char* readFile(const char* path){    
+char* read_file(const char* path){    
     FILE *fptr = fopen(path,"r");
     assert(fptr!=NULL);
 
@@ -20,31 +22,14 @@ char* readFile(const char* path){
     assert(bytesRead<=MAX_FILE_SIZE);
     
     char* result = (char*)malloc(bytesRead);
-    strcpy(result, buff);
-    
+    strcpy(result,buff);
+
     return result;
 }
 
-typedef struct test test;
-struct test{
-    int val1;
-    int val2;
-};
-
-void* editTest(void* dest, size_t bytes){
-    char* cast = (char*)dest;
-    return (void*)(cast+bytes);
-}
-
 int main(){
-    char* JSON = readFile("../test/test1.json");
-    printf("%s\n",JSON);
-    // test v = {10,20};
+    char* json_str = read_file("../test/test1.json");
+    lexer_tokenizer(json_str);
 
-    
-    // assert(&v==editTest(&v,0));
-    // assert(&v.val1==editTest(&v,0));
-    // assert(&v.val2==editTest(&v,4));
-    
     return 0;
 }
