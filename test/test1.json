@@ -1,4 +1,10 @@
 {
     "test":"hello world!",
-    "str2":"hello\"jimmy\"\n sandwich!"
+    "str2":"hello\"jimmy\"\b sandwich! false",
+    "int": 0,
+    "-int": -1,
+    "float": 3.2,
+    "-float": -3.2,
+    "true1": true,
+    "false1": false
 }

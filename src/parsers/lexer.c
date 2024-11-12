@@ -3,6 +3,10 @@
 #include <string.h>
 #include <stdlib.h>
 
+void token_print(token tok){
+    printf("Token ID: %d\nLine: %d\nCol: %d\nStr: %s\n",tok.type,tok.line,tok.col,tok.str);
+}
+
 token_type char_to_token(char value){
     switch(value){
         case '{': return LEFT_BRACE;
@@ -15,8 +19,18 @@ token_type char_to_token(char value){
         case '\\': return BACKSLASH; 
         case '\n': return NEWLINE;
         case ' ': return SPACE;
+
+        // why do these work? 
+        // well if they are in a string we will skip over these values 
+        // thus, the only time we see these chars is if they are a number or a boolean
+        case '-': return GENERIC_NUMBER;
+        case 't': return BOOLEAN;
+        case 'f': return BOOLEAN;
     }
 
+    if(value >= '0' && value <= '9'){
+        return GENERIC_NUMBER;
+    }
 
     if(value >= 'a' && value <= 'z'){
         return CHAR;
@@ -27,20 +41,29 @@ token_type char_to_token(char value){
 
 // pass at the qoute mark
 token parse_string(int* tracker, char *str) {
-    int flag_handle_escape_char = 0;
-    
-    int i;
+    int i; int size = 0;
     token tok;
-    char *test = malloc(100);
-    char *tp = test;
 
-    for(i=1; str[i]!='\0';i++){
-        token_type type = char_to_token(str[i]);
-        token_type prev_type = char_to_token(str[i-1]);
+    // getting size
+    for(int j=1; str[j]!='\0';j++){
+        token_type type = char_to_token(str[j]);
+        token_type prev_type = char_to_token(str[j-1]);
 
         if(type==QUOTE && prev_type!=BACKSLASH){
             break;
         }
+
+        size++;
+    }
+
+    // printf("size:%d\n",size);
+    char* new_str = malloc(size+1);
+    char* tp = new_str;
+
+    // parsing string
+    for(i=1; i<size+1; i++){
+        token_type type = char_to_token(str[i]);
+        token_type prev_type = char_to_token(str[i-1]);
 
         //handle escape char
         if(prev_type==BACKSLASH){
@@ -57,13 +80,38 @@ token parse_string(int* tracker, char *str) {
             *tp++ = str[i];
         }
     }
+    *tp = '\0'; //ending string
 
+    // copying values
+    tok.type = STRING;
+    tok.col = -1;
+    tok.line = -1;
+    tok.str = new_str;
 
-    // strncpy(test,(str+1),i-1);
+    // printf("%s string found %d long\n",new_str, size);
 
-    printf("%s string found %d long\n",test, i);
-    free(test);
-    *tracker+=i;
+    *tracker+=i; // adjust our postion in file
+    
+    return tok;
+}
+
+// TODO: boolean, int, float
+
+// on begining of boolean
+token parse_boolean(int *tracker, char *input_str){
+    token tok = {"",BOOLEAN,-1,-1};
+
+    if(strncmp(input_str,"true",4)==0){
+        tok.str = strdup("true");
+    }else if(strncmp(input_str,"false",4)==0){
+        tok.str = strdup("false");
+    }else{
+        tok.type = INVALID;
+        printf("invalid\n");
+    }
+
+    *tracker+=4;
+    return tok;
 }
 
 token *lexer_tokenizer(char *input_str) {
@@ -71,10 +119,12 @@ token *lexer_tokenizer(char *input_str) {
 
 
     for(int i=0; input_str[i]!='\0'; i++){
-        printf("it: %d\n",i);
+        // printf("it: %d\n",i);
         token_type type = char_to_token(input_str[i]);
-        if(type==QUOTE){
-            parse_string(&i,&input_str[i]);
+        switch(type){
+            case QUOTE: token_print(parse_string(&i,&input_str[i])); break;
+            case GENERIC_NUMBER: printf("number\n"); break;
+            case BOOLEAN: token_print(parse_boolean(&i, &input_str[i])); break;
         }
     }
 
