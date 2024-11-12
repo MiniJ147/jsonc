@@ -15,7 +15,7 @@ typedef struct token {
     token_type type;
     int line;
     int col;
-    char* lexeme;
+    char* literal;
 } token;
 
 // lexer

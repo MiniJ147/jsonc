@@ -1,3 +1,4 @@
 {
-    "test":"\""
+    "test":"hello world!",
+    "str2":"hello\"jimmy\"\n sandwich!"
 }

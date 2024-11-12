@@ -1,10 +1,9 @@
 #include "parsers.h"
-
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
+#include <stdlib.h>
 
-token_type lexer_char_to_token(char value){
+token_type char_to_token(char value){
     switch(value){
         case '{': return LEFT_BRACE;
         case '}': return RIGHT_BRACE;
@@ -26,23 +25,57 @@ token_type lexer_char_to_token(char value){
     return INVALID; 
 }
 
-token *lexer_tokenizer(char *input_str) {
-    token *tokens = malloc(sizeof(token) * strlen(input_str)); // rough size of what we will need
-    int row = 0; int col = 0;
-    int token_index = 0;
+// pass at the qoute mark
+token parse_string(int* tracker, char *str) {
+    int flag_handle_escape_char = 0;
+    
+    int i;
+    token tok;
+    char *test = malloc(100);
+    char *tp = test;
 
-    for(int i=0; input_str[i]!='\0'; i++){
-        char curr_char = input_str[i];
-        token *curr_token = &tokens[token_index];
+    for(i=1; str[i]!='\0';i++){
+        token_type type = char_to_token(str[i]);
+        token_type prev_type = char_to_token(str[i-1]);
 
-        token_type type = lexer_char_to_token(curr_char);
-        if(type==NEWLINE){
-            col = 0;
-            row++;
+        if(type==QUOTE && prev_type!=BACKSLASH){
+            break;
         }
 
-        printf("token: %c | token_id: %d | col: %d | row: %d\n",curr_char,type,col,row);
-        col++;
+        //handle escape char
+        if(prev_type==BACKSLASH){
+            switch(str[i]){
+                case 'n': *tp++ = '\n'; break;
+                case 'f': *tp++ = '\f'; break;
+                case 'b': *tp++ = '\b'; break;
+                case 'r': *tp++ = '\r'; break;
+                case 't': *tp++ = '\t'; break;
+                case '"': *tp++ = '\"'; break;
+                default: *tp++ = str[i];
+            }
+        }else if(type!=BACKSLASH){
+            *tp++ = str[i];
+        }
+    }
+
+
+    // strncpy(test,(str+1),i-1);
+
+    printf("%s string found %d long\n",test, i);
+    free(test);
+    *tracker+=i;
+}
+
+token *lexer_tokenizer(char *input_str) {
+    token *tokens = malloc(sizeof(token) * strlen(input_str));
+
+
+    for(int i=0; input_str[i]!='\0'; i++){
+        printf("it: %d\n",i);
+        token_type type = char_to_token(input_str[i]);
+        if(type==QUOTE){
+            parse_string(&i,&input_str[i]);
+        }
     }
 
     return tokens;
