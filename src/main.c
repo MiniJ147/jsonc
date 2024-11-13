@@ -18,18 +18,26 @@ char* read_file(const char* path){
 
     char buff[MAX_FILE_SIZE];
     
-    size_t bytesRead = fread(buff,sizeof(char),MAX_FILE_SIZE+1,fptr); // read 1 for file size thus, read MAX_FILE_SZIE bytes
+    size_t bytesRead = fread(buff,sizeof(char),MAX_FILE_SIZE,fptr); // read 1 for file size thus, read MAX_FILE_SZIE bytes
     assert(bytesRead<=MAX_FILE_SIZE);
     
     char* result = (char*)malloc(bytesRead);
     strcpy(result,buff);
-
+    
+    fclose(fptr);
     return result;
 }
 
+
 int main(){
     char* json_str = read_file("../test/test1.json");
-    lexer_tokenizer(json_str);
+    
+    int tokens_total = 0;
+    token* tokens = lexer_tokenizer(json_str, &tokens_total);
 
+    printf("%d\n",tokens_total);
+    
+    free(tokens);
+    free(json_str);
     return 0;
 }

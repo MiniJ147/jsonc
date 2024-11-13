@@ -2,10 +2,43 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <assert.h>
 
 void token_print(token tok){
     printf("Token ID: %d\nLine: %d\nCol: %d\nStr: %s\n",tok.type,tok.line,tok.col,tok.str);
 }
+
+token* token_init_null(){
+    return calloc(1, sizeof(token));
+}
+
+token* token_create(token_type type, size_t mem_size, char* str, int line, int col){
+    token *tok = malloc(sizeof(token));
+    
+    tok->type=type;
+    tok->mem_size = mem_size;
+    tok->str = str;
+    tok->line = line;
+    tok->col = col;
+    tok->data = malloc(mem_size);
+    
+    return tok;
+}
+
+void token_destory(token* tok){
+    assert(tok!=NULL);
+
+    free(tok->str);
+    free(tok->data);
+    free(tok);
+}
+
+
+// token *lexer_free(token* tokens, int size){
+//     for(int i=0; i<size; i++){
+//         free(tokens[i]);
+//     }
+// }
 
 token_type char_to_token(char value){
     switch(value){
@@ -40,9 +73,9 @@ token_type char_to_token(char value){
 }
 
 // pass at the qoute mark
-token parse_string(int* tracker, char *str) {
+token *parse_string(int* tracker, char *str) {
     int i; int size = 0;
-    token tok;
+    token *tok;
 
     // getting size
     for(int j=1; str[j]!='\0';j++){
@@ -82,32 +115,33 @@ token parse_string(int* tracker, char *str) {
     }
     *tp = '\0'; //ending string
 
-    // copying values
-    tok.type = STRING;
-    tok.col = -1;
-    tok.line = -1;
-    tok.str = new_str;
+    tok = token_create(STRING,size,new_str,-1,-1);
+    memcpy(tok->data,new_str,size);
 
     // printf("%s string found %d long\n",new_str, size);
 
     *tracker+=i; // adjust our postion in file
     
-    return tok;
+    return tok; 
 }
 
 // TODO: boolean, int, float
 
 // on begining of boolean
-token parse_boolean(int *tracker, char *input_str){
-    token tok = {"",BOOLEAN,-1,-1};
+token* parse_boolean(int *tracker, char *input_str){
+    token* tok = token_create(BOOLEAN, sizeof(int), NULL, -1, -1);
+    int* data_dest = (int*)tok->data;
 
     if(strncmp(input_str,"true",4)==0){
-        tok.str = strdup("true");
+        tok->str = strdup("true");
+        *data_dest = 1;
     }else if(strncmp(input_str,"false",4)==0){
-        tok.str = strdup("false");
+        tok->str = strdup("false");
+        *data_dest = 0;
     }else{
-        tok.type = INVALID;
-        printf("invalid\n");
+        tok->type = INVALID;
+        *data_dest = 0;
+        // printf("invalid\n");
     }
 
     *tracker+=4;
@@ -115,8 +149,10 @@ token parse_boolean(int *tracker, char *input_str){
 }
 
 // on begining of number
-token parse_number(int *tracker, char *input_str){
-    token tok;
+token* parse_number(int *tracker, char *input_str){
+    // sizeof int and float are same here so it doesn't matter which we use
+    token* tok = token_create(GENERIC_NUMBER, sizeof(int), NULL, -1, -1);
+    
     int i;
     int is_float = 0;
 
@@ -127,21 +163,19 @@ token parse_number(int *tracker, char *input_str){
         }
     }
 
-    //marking end of string for ato_ functions
+    //marking end of string for atoi & atof functions
     char tmp = input_str[i];
     input_str[i] = '\0';
     
     if(is_float){
-        tok.type = FLOAT;
-        // printf("%f\n",atof(input_str));
+        tok->type = FLOAT;
+        *(float*)tok->data = atof(input_str);
     }else{
-        tok.type = INT;
-        // printf("%d\n", atoi(input_str));
+        tok->type = INT;
+        *(int*)tok->data = atoi(input_str);
     }
 
-    tok.col = -1;
-    tok.line = -1;
-    tok.str = strdup(input_str);
+    tok->str = strdup(input_str);
 
     // replacing orginal value back
     input_str[i] = tmp;
@@ -150,17 +184,35 @@ token parse_number(int *tracker, char *input_str){
     return tok;
 }
 
-token *lexer_tokenizer(char *input_str) {
-    token *tokens = malloc(sizeof(token) * strlen(input_str));
-
+token *lexer_tokenizer(char *input_str, int* size) {
+    *size = strlen(input_str);
+    token *tokens = malloc(sizeof(token) * (*size));
 
     for(int i=0; input_str[i]!='\0'; i++){
         // printf("it: %d\n",i);
+        token* tok;
         token_type type = char_to_token(input_str[i]);
         switch(type){
-            case QUOTE: parse_string(&i,&input_str[i]); break;
-            case GENERIC_NUMBER: token_print(parse_number(&i, &input_str[i])); break;
-            case BOOLEAN: parse_boolean(&i, &input_str[i]); break;
+            case QUOTE: 
+            tok = parse_string(&i,&input_str[i]);
+            // printf("STRING: %s %zu %s |\n",tok->str,tok->mem_size,(char*)tok->str);
+            token_destory(tok);
+            break;
+            case GENERIC_NUMBER: 
+            tok = parse_number(&i, &input_str[i]);
+            if(tok->type==FLOAT){
+                printf("FLOAT: %s %zu %f |\n",tok->str, tok->mem_size, *(float*)tok->data);
+            }else if(tok->type==INT){
+                printf("INT: %s %zu %d |\n", tok->str, tok->mem_size, *(int*)tok->data);
+            }
+            token_destory(tok);
+            break;
+            case BOOLEAN: 
+            tok = parse_boolean(&i, &input_str[i]); 
+            // printf("BOOL: %s %zu %d |\n",tok->str, tok->mem_size, *(int*)tok->data);
+            
+            token_destory(tok);
+            break;
         }
     }
 
