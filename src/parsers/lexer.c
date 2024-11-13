@@ -114,6 +114,42 @@ token parse_boolean(int *tracker, char *input_str){
     return tok;
 }
 
+// on begining of number
+token parse_number(int *tracker, char *input_str){
+    token tok;
+    int i;
+    int is_float = 0;
+
+    // must be 0-9 or a (.) or (-)
+    for(i=0; input_str[i]>='0' && input_str[i]<='9' || input_str[i]=='.' || input_str[i]=='-'; i++){
+        if(input_str[i]=='.'){
+            is_float = 1;
+        }
+    }
+
+    //marking end of string for ato_ functions
+    char tmp = input_str[i];
+    input_str[i] = '\0';
+    
+    if(is_float){
+        tok.type = FLOAT;
+        // printf("%f\n",atof(input_str));
+    }else{
+        tok.type = INT;
+        // printf("%d\n", atoi(input_str));
+    }
+
+    tok.col = -1;
+    tok.line = -1;
+    tok.str = strdup(input_str);
+
+    // replacing orginal value back
+    input_str[i] = tmp;
+    
+    *tracker+=i;
+    return tok;
+}
+
 token *lexer_tokenizer(char *input_str) {
     token *tokens = malloc(sizeof(token) * strlen(input_str));
 
@@ -122,9 +158,9 @@ token *lexer_tokenizer(char *input_str) {
         // printf("it: %d\n",i);
         token_type type = char_to_token(input_str[i]);
         switch(type){
-            case QUOTE: token_print(parse_string(&i,&input_str[i])); break;
-            case GENERIC_NUMBER: printf("number\n"); break;
-            case BOOLEAN: token_print(parse_boolean(&i, &input_str[i])); break;
+            case QUOTE: parse_string(&i,&input_str[i]); break;
+            case GENERIC_NUMBER: token_print(parse_number(&i, &input_str[i])); break;
+            case BOOLEAN: parse_boolean(&i, &input_str[i]); break;
         }
     }
 

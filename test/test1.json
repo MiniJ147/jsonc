@@ -4,7 +4,7 @@
     "int": 0,
     "-int": -1,
     "float": 3.2,
-    "-float": -3.2,
+    "-float": -3.2256789,
     "true1": true,
     "false1": false
 }
