@@ -28,7 +28,10 @@ char* read_file(const char* path){
     return result;
 }
 
-
+struct foo {
+    int a;
+    int x;
+}foo;
 int main(){
     char* json_str = read_file("../test/test1.json");
 
@@ -39,6 +42,9 @@ int main(){
     for(int i=0; i<size; i++){
         printf("id: %d, str: %s\n",tokens[i].type, tokens[i].m_str);
     }
+
+    struct foo* data = (struct foo*)parser_parse(tokens,size);
+    printf("%d\n",data->x);
 
     token_free_arr(tokens,size);
     free(json_str);

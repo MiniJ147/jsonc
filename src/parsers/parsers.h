@@ -51,24 +51,7 @@ void token_free_arr(token* token_arr, int size);
 // returns an array of tokens
 token* lexer_tokenize(char* json_str, int* size_cnt);
 
-// typedef struct token {
-//     token_type type;
-//     int line;
-//     int col;
-//     size_t mem_size;
-//     char* str;
-//     void* data;
-// } token;
+// SECTION: Parser
 
-
-// struct token_v2;
-// struct token_v2* token_init_array(int n);
-// void token_init(struct token_v2* token);
-
-// // lexer
-
-// // token *lexer_free(token* tokens, int size);
-// token *lexer_tokenizer(char *input_str, int* size);
-
-// // parser
-// void parser_test();
+// takes token array and writes all data to buffer
+void* parser_parse(token* tokens, int token_size);

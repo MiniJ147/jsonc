@@ -1,15 +1,6 @@
 {
-    "test":"hello world!",
-    "str2":"hello\"jimmy\"\b sandwich! false",
-    "int": 0,
-    "-int": -1,
-    "float": 3.2,
-    "-float": -3.2256789,
-    "true1": true,
-    "false1": false,
-    "obj": {
-        "example": 3
-    },
-    "arr2": [true, true],
-    "arr1": [1,2,3,4,5,6]
+    "test":12345,
+    "example":{
+        "x":10
+    }
 }

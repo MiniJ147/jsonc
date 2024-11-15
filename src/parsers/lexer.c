@@ -50,7 +50,7 @@ void parse_string(token* tok, int* tracker, char *str) {
         size++;
     }
 
-    // printf("size:%d\n",size);
+    printf("size:%d\n",size);
     char* new_str = malloc(size);
     char* tp = new_str;
 
@@ -139,7 +139,7 @@ void parse_boolean(token* tok, int *tracker, char *input_str){
 
 token* lexer_tokenize(char* json_str, int* size_cnt) {
     int size = 0;
-    token* token_arr = token_init_arr(strlen(json_str)); // max amount of tokens ever needed;
+    token* token_arr = token_init_arr(strlen(json_str)+1); // max amount of tokens ever needed;
     
     for(int i=0; json_str[i]!='\0'; i++){
         token_type tok_type = char_to_token(json_str[i]);
