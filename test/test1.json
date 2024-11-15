@@ -6,5 +6,10 @@
     "float": 3.2,
     "-float": -3.2256789,
     "true1": true,
-    "false1": false
+    "false1": false,
+    "obj": {
+        "example": 3
+    },
+    "arr2": [true, true],
+    "arr1": [1,2,3,4,5,6]
 }

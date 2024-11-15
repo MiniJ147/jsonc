@@ -258,6 +258,7 @@ token_type char_to_token(char value){
         case '\\': return BACKSLASH; 
         case '\n': return NEWLINE;
         case ' ': return SPACE;
+        case '\t': return TAB;
 
         // why do these work? 
         // well if they are in a string we will skip over these values 
@@ -279,7 +280,7 @@ token_type char_to_token(char value){
 }
 
 void parse_string(token* tok, int* tracker, char *str) {
-    int i; int size = 0;
+    int i; int size = 1; // 1 so it accounts for \0
 
     // getting size
     for(int j=1; str[j]!='\0';j++){
@@ -294,11 +295,11 @@ void parse_string(token* tok, int* tracker, char *str) {
     }
 
     // printf("size:%d\n",size);
-    char* new_str = malloc(size+1);
+    char* new_str = malloc(size);
     char* tp = new_str;
 
     // parsing string
-    for(i=1; i<size+1; i++){
+    for(i=1; i<size; i++){
         token_type type = char_to_token(str[i]);
         token_type prev_type = char_to_token(str[i-1]);
 
@@ -320,11 +321,11 @@ void parse_string(token* tok, int* tracker, char *str) {
     *tp = '\0'; //ending string
 
     // remember new_str is strdup so we can reuse this value
-    token_init(tok, STRING, size+1, new_str, -1,-1);
+    token_init(tok, STRING, size, new_str, -1,-1);
     token_write_data(tok, new_str, size);
 
     free(new_str);
-    *tracker+=i; // adjust our postion in file     
+    *tracker+=i; // to skip over extra " 
 }
 
 void parse_number(token* tok, int *tracker, char *input_str){
@@ -357,7 +358,7 @@ void parse_number(token* tok, int *tracker, char *input_str){
     // replacing orginal value back
     input_str[i] = tmp;
     
-    *tracker+=i;
+    *tracker+=i-1; // adjust one back so for loop can skip
 }
 
 
@@ -377,7 +378,7 @@ void parse_boolean(token* tok, int *tracker, char *input_str){
         // printf("invalid\n");
     }
 
-    *tracker+=4;
+    *tracker+=3;
 }
 
 token* lexer_tokenize(char* json_str, int* size_cnt) {
@@ -413,6 +414,20 @@ token* lexer_tokenize(char* json_str, int* size_cnt) {
             
             size++;
             break;
+            case SPACE: break;
+            case NEWLINE:break;
+
+            default:
+            if(tok_type==INVALID){
+                printf("WARNING INVALID CHAR AT pos %d | char value: %c | int value: %d\n",i,json_str[i], json_str[i]);
+                continue;
+            }
+
+            char str[2] = "_\0";
+            str[0] = json_str[i];
+
+            token_init(tok_curr,tok_type,0,str,-1,-1);
+            size++;
         }
     }
 

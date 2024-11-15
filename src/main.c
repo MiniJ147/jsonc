@@ -36,6 +36,10 @@ int main(){
     token* tokens = lexer_tokenize(json_str, &size); 
     printf("found tokens with size %d\n",size);
     
+    for(int i=0; i<size; i++){
+        printf("id: %d, str: %s\n",tokens[i].type, tokens[i].m_str);
+    }
+
     token_free_arr(tokens,size);
     free(json_str);
     return 0;
