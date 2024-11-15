@@ -31,13 +31,12 @@ char* read_file(const char* path){
 
 int main(){
     char* json_str = read_file("../test/test1.json");
-    
-    int tokens_total = 0;
-    token* tokens = lexer_tokenizer(json_str, &tokens_total);
 
-    printf("%d\n",tokens_total);
+    int size;
+    token* tokens = lexer_tokenize(json_str, &size); 
+    printf("found tokens with size %d\n",size);
     
-    free(tokens);
+    token_free_arr(tokens,size);
     free(json_str);
     return 0;
 }

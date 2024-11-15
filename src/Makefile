@@ -1,4 +1,4 @@
-files = parsers/parser.c parsers/lexer.c main.c
+files = parsers/*.c main.c
 output = ../bin/a.out
 
 run:
